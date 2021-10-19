@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+  <head>
+    <title>Primer_Presentation.utf8</title>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="xaringan-themer.css" type="text/css" />
+  </head>
+  <body>
+    <textarea id="source">
+
+
+class: inverse, center, middle
+background-image: url(https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/rm283-nunny-055_1.jpg?w=1000&amp;dpr=1&amp;fit=default&amp;crop=default&amp;q=65&amp;vib=3&amp;con=3&amp;usm=15&amp;bg=F4F4F3&amp;ixlib=js-2.2.1&amp;s=0503dd0e4320aa87005543d9bc7ebfe4)
+background-size: cover
+
+&lt;h1 style="color:white;font-size:40px;"&gt; A Primer for Conducting a Meta-Analysis &lt;/h1&gt;
+
+&lt;img src="https://d33wubrfki0l68.cloudfront.net/7e89f71ee68cff45427e783fdc58510a9e32dfc9/0da76/wp-content/uploads/2018/10/rstudio-logo-white.png" width="200px"/&gt;
+&lt;p1 style="color:white;font-size:25px;"&gt; USING ROBUMETA, META-VIZ, and FORESTER &lt;/p1&gt;
+
+&lt;p2 style="color:white;font-size:16px;"&gt;
+.large[Jay Jeffries &amp; Jonah Garbin | Seminar | 22 Oct 2021]&lt;/p1&gt;
+
+---
+class: inverse
+## Agenda
+
+- &lt;font size="9"&gt; Introduction &lt;/font&gt;
+
+- &lt;font size="9"&gt; General Steps in Conducting &lt;/font&gt;
+
+- &lt;font size="9"&gt; Jonah's Meta-Analysis &lt;/font&gt;
+
+- &lt;font size="9"&gt; Jay's Meta-Analysis &lt;/font&gt;
+
+- &lt;font size="9"&gt; Thoughts and Questions &lt;/font&gt;
+
+---
+class: middle
+## Differentiating Methodology
+
+- Literature Review: Qualitatively summarizes a collection of literature within a field of study through use of subjective, interpretive, less formal techniques.
+  - Provides context and background information for a line of research.
+
+- Systematic Review: Synthesizes screened works from pre-specified eligibility criteria to appraise quality and validity of studies to answer a research question.
+  - “Systematic” defines the method of transparency and reproducibility to minimize bias (i.e. cherry-picking) when selecting studies.
+
+- **Meta-Analysis: Statistically describes study outcomes derived from a screened sample of articles or unpublished works via a common metric (e.g. d, g, r, OR, Cramer’s V).**
+  - **Results in the _robust_ calculation and interpretation of an overall estimated effect size for a relationship or intervention of interest.**
+---
+class: inverse, middle
+
+# Rationale: *Why Meta-Analysis*?
+
+You want to estimate the average effect (or variance) from a set of studies
+
+&lt;p2 style="font-size:12px;"&gt; Example: When all scores are included in the analysis, children classified with speech language impairement scored lower on writing measures than their typically developing peers (*g* = −0.97). &lt;/p2&gt;
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Graham.png?raw=true" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, middle
+
+# Rationale: *Why Meta-Analysis*?
+
+You want to explore variations or probe moderators across study results
+
+&lt;p2 style="font-size:12px;"&gt; Example: The studies indicated that visual art therapy significantly reduced depressive symptoms (&lt;i&gt;g&lt;/i&gt; = −0.380 [−0.693, −0.067], &lt;i&gt;p&lt;/i&gt; = .017) anxiety symptoms (&lt;i&gt;g&lt;/i&gt; = −0.263, [−0.482, −0.044], &lt;i&gt;p&lt;/i&gt; = .019). &lt;/p2&gt;
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Masika.png?raw=true" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse, middle
+
+# Rationale: *Why Meta-Analysis*?
+
+You want to identify bias in the existing reported literature
+
+&lt;p2 style="font-size:12px;"&gt; Example: Egger’s regression test produced nonsignificant results ( &amp;beta; = .57, &lt;i&gt;p&lt;/i&gt; = .26). The trim and fill procedure to address publication
+bias revealed that 1 negative result was missing from the bystander intervention outcomes, but the imputed missing value did not change the overall statistical significance. These results show publication bias did not significantly impact outcomes. &lt;/p2&gt;
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Polanin.png?raw=true" height="300px" style="display: block; margin: auto;" /&gt;
+---
+class: 
+## Steps To Conducting a Meta-Analysis
+
+1. &lt;font size="5"&gt; Formulate Research Questions &lt;/font&gt;
+
+2. &lt;font size="5"&gt; Literature Search &lt;/font&gt;
+
+3. &lt;font size="5"&gt; Screen the Literature &lt;/font&gt;
+
+4. &lt;font size="5"&gt; Code the Studies &lt;/font&gt;
+
+5. &lt;font size="5"&gt; Visualize Data &lt;/font&gt;
+
+6. &lt;font size="5"&gt; Statistically Describe Effect Sizes &lt;/font&gt;
+
+7. &lt;font size="5"&gt; Data and Bias Diagnostics &lt;/font&gt;
+
+8. &lt;font size="5"&gt; Interpreting Outcomes &lt;/font&gt;
+
+9. &lt;font size="5"&gt; Presenting Results &lt;/font&gt;
+
+10. &lt;font size="5"&gt; I like even numbers so CELEBRATE at step 10 &lt;/font&gt;
+
+.footnote[
+&lt;small&gt;Cooper, Hedges, &amp; Valentine (2019) &lt;i&gt;The Handbook Of Research
+Synthesis and Meta-Analysis&lt;/i&gt;&lt;/small&gt;
+
+&lt;small&gt;Pigott, Polanin, Williams (2021) &lt;i&gt;AERA-ICPSR Workshop&lt;/i&gt; &lt;/small&gt;
+]
+---
+class: inverse
+
+## 1. Formulate Research Question
+
+### Routes to consider...
+
+- *Intervention Effectiveness*: how effective is an intervention or group of interventions?
+  - E.g. What is the impact of a specific simulation-based learning intervention on new graduate nurse self-efficacy?
+  
+- *Relationships*: how are these constructs related to one another?
+  - E.g. How is student civic engagement associated with school pride?
+  
+- *Prevalence*: how likely is the occurrence of a condition?
+  - E.g. What is the difference in likelihood of ACL tear across sex for basketball athletes?
+  
+---
+class: inverse
+
+## 1. Formulate Research Question
+
+### Routes to consider...
+  
+- *Instrument Diagnostics*: how well does an instrument or test predict a condition across conditions or groups?
+  - How well does the WISC-V intelligence scale evaluate students of ELL status?
+  - May be worthwhile before conducting a replication study
+  
+- *Comparative Effectiveness*: how do interventions or instruments compare or relate to one another?
+  - How does the Marlowe-Crowne Social Desirability Scale compare to the Brief Social Desirability Scale when assessing those applying for management positions?
+  - Great for evaluating feasibility of a cheaper program when compared to a more expensive program
+---
+class: middle
+
+## 1. Formulate Research Questions
+### Defining Research Criteria 
+#### Helpful for Literature Searching!
+
+**P** - Population, Participants
+
+**I** - Independent Variables (or predictors)
+
+**C** - Conditions (settings, contexts, time frame)
+
+**O** - Outcomes (measures, dependent variables, criterion)
+
+**S** - Study design 
+
+.footnote[
+&lt;small&gt;An adaptation of Cronbach's &lt;i&gt;UTOS&lt;/i&gt; framework&lt;/small&gt;
+]
+---
+class: inverse
+## 2. Literature Search
+### Database Searching
+
+Use your **PICOS** information to create Boolean operators to commune with the literature, improve the yield, and make this process as easy as possible. 
+- Update search term list as you become more familiar with the literature
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/BOO-leanOperator.jpeg?raw=true" width="70%" height="50%" style="display: block; margin: auto;" /&gt;
+
+Your aim is to capture all plausible content relevant to your research question!
+
+---
+class: inverse, middle
+## 2. Literature Search
+### Database Searching
+
+Select databases, journals that are prevalent to your field of research. 
+- Unsure about this? Contact our library liason, [Erica DeFrain](https://directory.unl.edu/people/edefrain2). 
+
+Ensure that you are including a search for *unpublished* research
+- ProQuest Dissertation &amp; Theses, EBSCO Open Dissertations, Open Access Dissertation and Theses (OATD)
+- Document delivery systems -- Interlibrary Loan/ILLiad
+- Contact author(s)
+
+Locating unpublished research is, inevitably, be difficult
+- Feeds the phenomenon of Publication Bias
+
+---
+class: inverse
+## 2. Literature Search
+#### [Citation Searching and Footnote Chasing](https://libguides.williams.edu/citationsearching/introduction)
+.pull-left[
+1. Backward citation search: looking at the works cited by an author
+]
+.pull-right[
+2. Forward citation search: following where a work has been cited after its publication
+]
+
+Create boundaries. Know when to stop searching. This *could* go on forever. 
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%2011.21.41%20AM.png?raw=true" width="80%" height="70%" style="display: block; margin: auto;" /&gt;
+
+&lt;small&gt;Sherman et al. (2009)&lt;/small&gt;
+
+---
+class: middle
+### Database Search Example
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%2011.04.38%20AM.png?raw=true" width="80%" height="60%" style="display: block; margin: auto;" /&gt;
+
+---
+class: inverse
+## 2. Literature Search
+### Managing Search Results
+.pull-left[
+To record your selection process pull all journal, database, and citation search results into an reference manager.
+- Zotero
+- Mendelay
+- EndNotes
+- RefWorks
+
+Export content into Excel (or some equivalent) to assess criteria in the screening step
+]
+.pull-left[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%201.29.34%20PM.png?raw=true" width="90%" height="70%" style="display: block; margin: auto 0 auto auto;" /&gt;
+]
+---
+class: middle, inverse
+## 3. Screen the Literature
+
+To identify articles eligible for review, you will go through a process of screening
+1. Your first phase of screening: filter though abstract or titles
+2. Your second phase of screening: filter whole-document 
+
+Things you are looking for:
+- Evidence of your **PICOS** list; i.e. inclusion and exclusion criteria
+- The I.V.(s) and D.V.(s) that you are interested in
+- Areas to update your search term list
+- Potential moderators of interest 
+  - What other common factors impact your RQ's? Write these down!
+- An *effect size*
+
+---
+class: middle
+### Defining Form of Effect Size
+
+This decision should be informed by:
+- your research question 
+- your field of research and audience (education, psychology, medicine?)
+- how you wish to interpret your findings
+
+You typically select from one of three families: 
+1. Mean difference
+2. Proportion
+3. Association
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/effect_sizes.jpeg?raw=true" width="80%" height="50%" style="display: block; margin: auto;" /&gt;
+---
+class: middle
+### Types of Effect Sizes (ES)
+
+&lt;u&gt;Effects Based on Means (Standardized)&lt;/u&gt;
+- Cohen's *d*: difference between groups in terms of standard deviations
+- Hedge's *g*: small sample correction (when *n* &amp;#8804; 20) version of *d*
+- Glass's &amp;Delta;: uses untainted SD of control group (use when SDs are sig. different)
+
+---
+class: middle
+### Types of Effect Sizes (ES)
+
+&lt;u&gt;Effects Based on Binary Proportion Data&lt;/u&gt;
+- Odds Ratio *OR*: ratio of events (e.g. lung cancer in smoker) to non-events (e.g. lung cancer in non-smokers)
+- Risk Ratio *RR*: ratio of two proportions to show relative risk 
+- Risk Differences *RD*: attributable risk difference between two groups
+
+---
+class: middle
+### Types of Effect Sizes (ES)
+
+&lt;u&gt;Effects Based on Association&lt;/u&gt;
+- Pearson product-moment correlation coefficient *r*: measure of association between two continuous variables
+- Point-biserial correlation &lt;i&gt;r&lt;sub&gt;pb&lt;/sub&gt;&lt;/i&gt;: measure of association when one variable is dichotomous
+- Phi coefficient &amp;Phi; : measure of association when both variables are dichotomous
+---
+class: inverse
+
+## 3. Screen the Literature
+### Effect Size Calculators and Converters
+
+When you run into: 
+- an F-statistic that you need translated into a Cohen's *d*
+- a &amp;beta; that you must identify as an *r*
+- a Risk Ratio that you wish were a Hedge's *g*
+- a &amp;#120536;&lt;sup&gt;2&lt;/sup&gt; value that needs to be an *OR*
+
+Use these resources or create your own Excel/R calculators
+
+[Campbell's Collaboration](https://www.campbellcollaboration.org/research-resources/effect-size-calculator.html)
+
+[Psychometrica](https://www.psychometrica.de/effect_size.html)
+
+[escal](https://www.escal.site/#)
+---
+class: 
+## Standard Reporting
+Transparent reporting is inherent in meta-analyses, and requires you to track your literature search.
+- Allows others to audit your search, replicate, and confirm your findings
+  - Validity and honesty of your research practice (you have "*the receipts*"!)
+- Concurrent with your search, screening, and quality appraisal process
+
+&lt;small&gt; Recommended [PRISMA Guidelines](http://www.prisma-statement.org/PRISMAStatement/PRISMAEandE)&lt;/small&gt;
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/PRISMA(2020).png?raw=true" width="70%" height="50%" style="display: block; margin: auto;" /&gt;
+&lt;small&gt;[Shiny app](https://estech.shinyapps.io/prisma_flowdiagram/) to automate the creation of your flow diagram.&lt;/small&gt;
+
+---
+class: middle
+## 4. Code the Studies
+#### Codebook and Moderators
+
+.pull-left[General information
+- article title, author, study number, effect size ID, publication type
+
+Participant information
+- sample size, % female, race/ethnicity indicators, average age, % diagnosed, etc.
+
+Measure information
+- name of instrument, scale, metric
+]
+.pull-left[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/MagnifyingGlass.gif?raw=true" style="display: block; margin: auto;" /&gt;
+]
+---
+class: middle
+## 4. Code the Studies
+#### Codebook and Moderators
+.pull-left[
+Effect size information
+- effect size statistic, variance, upper/lower CI, Fisher's z score
+]
+.pull-right[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/garbageingarbageout11.png?raw=true" width="70%" height="50%" style="display: block; margin: auto;" /&gt;
+]
+Study Quality information
+- measurement reliability (sample/manual), article quality tool, study power
+---
+class: middle
+## 5. Visualize the Data
+
+
+
+
+
+---
+class: inverse
+## 6. Statistically Describe Effect Sizes
+
+Effect sizes have the advantage of being comparable across all screened studies 
+  - To do so, each ES needs a standard error, which are vital to the 
+
+Effect size dependencies create an implied multilevel structure
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/MultilevelES.png?raw=true" width="80%" height="60%" style="display: block; margin: auto;" /&gt;
+&lt;small&gt; Effect size nested within a sample, nested within an study, within an article, within a population &lt;/small&gt;
+---
+class: 
+### Type of Model
+
+| Fixed Effect                                                    | Random Effect                                                            |
+|-----------------------------------------------------------------|--------------------------------------------------------------------------|
+| One true effect                                                 | True effect varies                                                       |
+| Effects from a single, homogeneous population                   | Effects from a distribution of effect sizes                              |
+| Differences between studies are due only to sampling error      | Differences between studies are due many factors                         |
+| Larger studies are more influential                             | Studies weighted in a balanced way                                       |
+| Only account for within-study heterogeneity &amp; error             | Accounts for within-study and between-study heterogeneity &amp; error        |
+| Goal is to find the one true effect size that all studies share | Goal is to find the average effect from the distribution of effect sizes |
+| Often used for smaller sample of articles                       | Difficult to understand heterogeneity in small sample of articles        |
+
+&lt;small&gt;Borenstein et al. (2010)&lt;/small&gt;
+---
+### Type of Model
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%203.21.05%20PM.png?raw=true" width="80%" height="60%" style="display: block; margin: auto;" /&gt;
+---
+### Type of Model
+
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FEvsRE.jpg?raw=true" width="80%" height="60%" style="display: block; margin: auto;" /&gt;
+---
+class: inverse
+### Fixed Effects Model
+
+.pull-left[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FEModel.png?raw=true" width="80%" height="60%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+Strong assumption: effect sizes are homogeneous
+- Reserve for instances where studies are *close* replications of one another
+
+One source of variability: 
+- sampling error (*SE*&lt;sub&gt;i&lt;/sub&gt;)
+- while *w*&lt;sub&gt;i&lt;/sub&gt; indicates ES weight
+]
+.pull-left[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FE_ES.png?raw=true" width="50%" height="40%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Fix_SE.png?raw=true" width="50%" height="30%" style="display: block; margin: auto;" /&gt;
+]
+
+&lt;small&gt;Pigott, Polanin, Williams (2021) &lt;i&gt;AERA-ICPSR Workshop&lt;/i&gt; &lt;/small&gt;
+---
+class: inverse
+### Random Effects Model
+
+.pull-left[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/REModel.png?raw=true" width="80%" height="60%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+Harder to rule out a random effects model unless sterile conditions, carefully scripted, and precise replications
+
+Two sources of variability: 
+- sampling error (*SE*&lt;sub&gt;i&lt;/sub&gt;) 
+-  between-study variance (&amp;tau;&lt;sup&gt;2&lt;/sup&gt;)
+- *w*&lt;sub&gt;i&lt;/sub&gt; still indicates ES weight
+]
+.pull-left[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FE_ES.png?raw=true" width="50%" height="40%" style="display: block; margin: auto;" /&gt;
+]
+.pull-right[
+&lt;img src="https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Rand_SE.png?raw=true" width="50%" height="40%" style="display: block; margin: auto;" /&gt;
+]
+
+&lt;small&gt;Pigott, Polanin, Williams (2021) &lt;i&gt;AERA-ICPSR Workshop&lt;/i&gt; &lt;/small&gt;
+---
+## Resources
+[Doing Meta-Analysis in R](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/)
+- &lt;small&gt;Online Text
+- Advanced sections: MLM M-A, SEM M-A, Network M-A, Bayesian M-A&lt;/small&gt;
+
+[{robumute} Vignette](https://cran.r-project.org/web/packages/robumeta/vignettes/robumetaVignette.pdf)
+- &lt;small&gt;RVE Meta-Regression, Publication Bias Assessments&lt;/small&gt;
+
+[{metaviz} Vignette](https://cran.r-project.org/web/packages/metaviz/vignettes/metaviz.html)
+- &lt;small&gt;Power Sunset Plots&lt;/small&gt;
+
+[{forester} GitHub Page (WIP!)](https://github.com/rdboyes/forester/)
+- &lt;small&gt;Publication-Ready Forest Plots&lt;/small&gt;
+
+---
+## References
+
+---
+# Thoughts and Questions
+    </textarea>
+<style data-target="print-only">@media screen {.remark-slide-container{display:block;}.remark-slide-scaler{box-shadow:none;}}</style>
+<script src="https://remarkjs.com/downloads/remark-latest.min.js"></script>
+<script>var slideshow = remark.create({
+"highlightStyle": "solarized-dark",
+"highlightLines": true,
+"countIncrementalSlides": false
+});
+if (window.HTMLWidgets) slideshow.on('afterShowSlide', function (slide) {
+  window.dispatchEvent(new Event('resize'));
+});
+(function(d) {
+  var s = d.createElement("style"), r = d.querySelector(".remark-slide-scaler");
+  if (!r) return;
+  s.type = "text/css"; s.innerHTML = "@page {size: " + r.style.width + " " + r.style.height +"; }";
+  d.head.appendChild(s);
+})(document);
+
+(function(d) {
+  var el = d.getElementsByClassName("remark-slides-area");
+  if (!el) return;
+  var slide, slides = slideshow.getSlides(), els = el[0].children;
+  for (var i = 1; i < slides.length; i++) {
+    slide = slides[i];
+    if (slide.properties.continued === "true" || slide.properties.count === "false") {
+      els[i - 1].className += ' has-continuation';
+    }
+  }
+  var s = d.createElement("style");
+  s.type = "text/css"; s.innerHTML = "@media print { .has-continuation { display: none; } }";
+  d.head.appendChild(s);
+})(document);
+// delete the temporary CSS (for displaying all slides initially) when the user
+// starts to view slides
+(function() {
+  var deleted = false;
+  slideshow.on('beforeShowSlide', function(slide) {
+    if (deleted) return;
+    var sheets = document.styleSheets, node;
+    for (var i = 0; i < sheets.length; i++) {
+      node = sheets[i].ownerNode;
+      if (node.dataset["target"] !== "print-only") continue;
+      node.parentNode.removeChild(node);
+    }
+    deleted = true;
+  });
+})();
+(function() {
+  "use strict"
+  // Replace <script> tags in slides area to make them executable
+  var scripts = document.querySelectorAll(
+    '.remark-slides-area .remark-slide-container script'
+  );
+  if (!scripts.length) return;
+  for (var i = 0; i < scripts.length; i++) {
+    var s = document.createElement('script');
+    var code = document.createTextNode(scripts[i].textContent);
+    s.appendChild(code);
+    var scriptAttrs = scripts[i].attributes;
+    for (var j = 0; j < scriptAttrs.length; j++) {
+      s.setAttribute(scriptAttrs[j].name, scriptAttrs[j].value);
+    }
+    scripts[i].parentElement.replaceChild(s, scripts[i]);
+  }
+})();
+(function() {
+  var links = document.getElementsByTagName('a');
+  for (var i = 0; i < links.length; i++) {
+    if (/^(https?:)?\/\//.test(links[i].getAttribute('href'))) {
+      links[i].target = '_blank';
+    }
+  }
+})();
+// adds .remark-code-has-line-highlighted class to <pre> parent elements
+// of code chunks containing highlighted lines with class .remark-code-line-highlighted
+(function(d) {
+  const hlines = d.querySelectorAll('.remark-code-line-highlighted');
+  const preParents = [];
+  const findPreParent = function(line, p = 0) {
+    if (p > 1) return null; // traverse up no further than grandparent
+    const el = line.parentElement;
+    return el.tagName === "PRE" ? el : findPreParent(el, ++p);
+  };
+
+  for (let line of hlines) {
+    let pre = findPreParent(line);
+    if (pre && !preParents.includes(pre)) preParents.push(pre);
+  }
+  preParents.forEach(p => p.classList.add("remark-code-has-line-highlighted"));
+})(document);</script>
+
+<script>
+slideshow._releaseMath = function(el) {
+  var i, text, code, codes = el.getElementsByTagName('code');
+  for (i = 0; i < codes.length;) {
+    code = codes[i];
+    if (code.parentNode.tagName !== 'PRE' && code.childElementCount === 0) {
+      text = code.textContent;
+      if (/^\\\((.|\s)+\\\)$/.test(text) || /^\\\[(.|\s)+\\\]$/.test(text) ||
+          /^\$\$(.|\s)+\$\$$/.test(text) ||
+          /^\\begin\{([^}]+)\}(.|\s)+\\end\{[^}]+\}$/.test(text)) {
+        code.outerHTML = code.innerHTML;  // remove <code></code>
+        continue;
+      }
+    }
+    i++;
+  }
+};
+slideshow._releaseMath(document);
+</script>
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+(function () {
+  var script = document.createElement('script');
+  script.type = 'text/javascript';
+  script.src  = 'https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML';
+  if (location.protocol !== 'file:' && /^https?:/.test(script.src))
+    script.src  = script.src.replace(/^https?:/, '');
+  document.getElementsByTagName('head')[0].appendChild(script);
+})();
+</script>
+  </body>
+</html>
