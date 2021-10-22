@@ -4,4 +4,4 @@
 
 You can find the reproduced slides under [Primer_Presentation.pdf](https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Code/Primer_Presentation.pdf) or you can use my code in your own R environment from the [Primer_Presentation.Rmd](https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Code/Primer_Presentation.Rmd) file.
 
-To knit the slides to completion, it is recommended that you download both .csv files under Data. </font>
+To knit the slides to completion, it is recommended that you download the .csv files under Data. </font>
