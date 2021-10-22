@@ -1,0 +1,975 @@
+---
+title: " "
+
+output:
+  xaringan::moon_reader:
+    css: ["xaringan-themer.css"]
+    nature:
+      highlightStyle: solarized-dark
+      highlightLines: true
+      countIncrementalSlides: false
+---
+```{r xaringan-themer, include=FALSE, warning=FALSE}
+library(xaringanthemer)
+library(knitr)
+library(kableExtra)
+library(dplyr)
+library("metafor")
+library("robumeta")
+library("puniform")
+library("metaviz")
+library("ggplot2")
+library("ggforce")
+library("dplyr")
+library(ggthemes)
+library(ggridges)
+library(tidyverse)
+library(ggpubr)
+library(rstatix)
+library(broom)
+library(Matrix)
+library(corrplot)
+library(gtsummary)
+library(pwr)
+library(puniform)
+#library(forester)
+
+#devtools::install_github("rdboyes/forester")
+
+
+style_solarized_dark()
+```
+class: inverse, center, middle
+background-image: url(https://img.rawpixel.com/s3fs-private/rawpixel_images/website_content/rm283-nunny-055_1.jpg?w=1000&dpr=1&fit=default&crop=default&q=65&vib=3&con=3&usm=15&bg=F4F4F3&ixlib=js-2.2.1&s=0503dd0e4320aa87005543d9bc7ebfe4)
+background-size: cover
+
+<h1 style="color:white;font-size:40px;"> A Primer for Conducting a Meta-Analysis </h1>
+
+<img src="https://d33wubrfki0l68.cloudfront.net/7e89f71ee68cff45427e783fdc58510a9e32dfc9/0da76/wp-content/uploads/2018/10/rstudio-logo-white.png" width="200px"/>
+<p1 style="color:white;font-size:25px;"> USING ROBUMETA, METAFOR, META-VIZ, and FORESTER </p1>
+
+<p2 style="color:white;font-size:16px;">
+.large[Jay Jeffries & Jonah Garbin | Seminar | 22 Oct 2021]</p1>
+
+---
+class: inverse
+## Agenda
+
+- <font size="9"> Introduction </font>
+
+- <font size="9"> General Steps in Conducting </font>
+
+- <font size="9"> Jonah's Meta-Analysis </font>
+
+- <font size="9"> Thoughts and Questions </font>
+
+---
+class: middle
+## Differentiating Methodology
+
+- Literature Review: Qualitatively summarizes a collection of literature within a field of study through use of subjective, interpretive, less formal techniques.
+  - Provides context and background information for a line of research.
+
+- Systematic Review: Synthesizes screened works from pre-specified eligibility criteria to appraise quality and validity of studies to answer a research question.
+  - “Systematic” defines the method of transparency and reproducibility to minimize bias (i.e. cherry-picking) when selecting studies.
+
+- **Meta-Analysis: Statistically describes study outcomes derived from a screened sample of articles or unpublished works via a common metric (e.g. d, g, r, OR, Cramer’s V).**
+  - **Results in the _robust_ calculation and interpretation of an overall estimated effect size for a relationship or intervention of interest.**
+---
+class: inverse, middle
+
+# Rationale: *Why Meta-Analysis*?
+
+You want to estimate the average effect (or variance) from a set of studies
+
+<p2 style="font-size:12px;"> Example: When all scores are included in the analysis, children classified with speech language impairement scored lower on writing measures than their typically developing peers (*g* = −0.97). </p2>
+
+```{r, echo = FALSE, fig.align = "center"}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Graham.png?raw=true")
+```
+
+---
+class: inverse, middle
+
+# Rationale: *Why Meta-Analysis*?
+
+You want to explore variations or probe moderators across study results
+
+<p2 style="font-size:12px;"> Example: The studies indicated that visual art therapy significantly reduced depressive symptoms (<i>g</i> = −0.380 [−0.693, −0.067], <i>p</i> = .017) anxiety symptoms (<i>g</i> = −0.263, [−0.482, −0.044], <i>p</i> = .019). </p2>
+
+```{r, echo = FALSE, fig.align = "center"}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Masika.png?raw=true")
+```
+
+---
+class: inverse, middle
+
+# Rationale: *Why Meta-Analysis*?
+
+You want to identify bias in the existing reported literature
+
+<p2 style="font-size:12px;"> Example: Egger’s regression test produced nonsignificant results ( &beta; = .57, <i>p</i> = .26). The trim and fill procedure to address publication
+bias revealed that 1 negative result was missing from the bystander intervention outcomes, but the imputed missing value did not change the overall statistical significance. These results show publication bias did not significantly impact outcomes. </p2>
+
+```{r, echo = FALSE, out.height = "300px", fig.align = "center"}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Polanin.png?raw=true")
+```
+---
+class: 
+## Steps To Conducting a Meta-Analysis
+
+1. <font size="5"> Formulate Research Questions </font>
+
+2. <font size="5"> Literature Search </font>
+
+3. <font size="5"> Screen the Literature </font>
+
+4. <font size="5"> Code the Studies </font>
+
+5. <font size="5"> Visualize Data </font>
+
+6. <font size="5"> Statistically Describe Effect Sizes </font>
+
+7. <font size="5"> Data and Bias Diagnostics </font>
+
+8. <font size="5"> Interpreting Outcomes </font>
+
+9. <font size="5"> Presenting Results </font>
+
+.footnote[
+<small>Cooper, Hedges, & Valentine (2019) <i>The Handbook Of Research
+Synthesis and Meta-Analysis</i></small>
+
+<small>Pigott, Polanin, Williams (2021) <i>AERA-ICPSR Workshop</i> </small>
+]
+---
+class: inverse
+
+## 1. Formulate Research Question
+
+### Routes to consider...
+
+- *Intervention Effectiveness*: how effective is an intervention or group of interventions?
+  - E.g. What is the impact of a specific simulation-based learning intervention on new graduate nurse self-efficacy?
+  
+- *Relationships*: how are these constructs related to one another?
+  - E.g. How is student civic engagement associated with school pride?
+  
+- *Prevalence*: how likely is the occurrence of a condition?
+  - E.g. What is the difference in likelihood of ACL tear across sex for basketball athletes?
+  
+---
+class: inverse
+
+## 1. Formulate Research Question
+
+### Routes to consider...
+  
+- *Instrument Diagnostics*: how well does an instrument or test predict a condition across conditions or groups?
+  - How well does the WISC-V intelligence scale evaluate students of ELL status?
+  - May be worthwhile before conducting a replication study
+  
+- *Comparative Effectiveness*: how do interventions or instruments compare or relate to one another?
+  - How does the Marlowe-Crowne Social Desirability Scale compare to the Brief Social Desirability Scale when assessing those applying for management positions?
+  - Great for evaluating feasibility of a cheaper program when compared to a more expensive program
+---
+class: middle
+
+## 1. Formulate Research Questions
+### Defining Research Criteria 
+#### Helpful for Literature Searching!
+
+**P** - Population, Participants
+
+**I** - Independent Variables (or predictors)
+
+**C** - Conditions (settings, contexts, time frame)
+
+**O** - Outcomes (measures, dependent variables, criterion)
+
+**S** - Study design 
+
+.footnote[
+<small>An adaptation of Cronbach's <i>UTOS</i> framework</small>
+]
+---
+class: inverse
+## 2. Literature Search
+### Database Searching
+
+Use your **PICOS** information to create Boolean operators to commune with the literature, improve the yield, and make this process as easy as possible. 
+- Update search term list as you become more familiar with the literature
+
+```{r, out.height= "50%", out.width= "70%", echo = FALSE, fig.align='center'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/BOO-leanOperator.jpeg?raw=true")
+```
+
+Your aim is to capture all plausible content relevant to your research question!
+
+---
+class: inverse, middle
+## 2. Literature Search
+### Database Searching
+
+Select databases, journals that are prevalent to your field of research. 
+- Unsure about this? Contact our library liason, [Erica DeFrain](https://directory.unl.edu/people/edefrain2). 
+
+Ensure that you are including a search for *unpublished* research
+- ProQuest Dissertation & Theses, EBSCO Open Dissertations, Open Access Dissertation and Theses (OATD)
+- Document delivery systems -- Interlibrary Loan/ILLiad
+- Contact author(s)
+
+Locating unpublished research is, inevitably, be difficult
+- Feeds the phenomenon of Publication Bias
+
+---
+class: inverse
+## 2. Literature Search
+#### [Citation Searching and Footnote Chasing](https://libguides.williams.edu/citationsearching/introduction)
+.pull-left[
+1. Backward citation search: looking at the works cited by an author
+]
+.pull-right[
+2. Forward citation search: following where a work has been cited after its publication
+]
+
+Create boundaries. Know when to stop searching. This *could* go on forever. 
+
+```{r, out.height= "70%", out.width= "80%", echo = FALSE, fig.align='center'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%2011.21.41%20AM.png?raw=true")
+```
+
+<small>Sherman et al. (2009)</small>
+
+---
+class: middle
+### Database Search Example
+```{r, out.height= "60%", out.width= "80%", echo = FALSE, fig.align='center'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%2011.04.38%20AM.png?raw=true")
+```
+
+---
+class: inverse
+## 2. Literature Search
+### Managing Search Results
+.pull-left[
+To record your selection process pull all journal, database, and citation search results into an reference manager.
+- Zotero
+- Mendelay
+- EndNotes
+- RefWorks
+
+Export content into Excel (or some equivalent) to assess criteria in the screening step
+]
+.pull-left[
+```{r, out.height= "70%", out.width= "90%", echo = FALSE, fig.align='right'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%201.29.34%20PM.png?raw=true")
+```
+]
+---
+class: middle, inverse
+## 3. Screen the Literature
+
+To identify articles eligible for review, you will go through a process of screening
+1. Your first phase of screening: filter though abstract or titles
+2. Your second phase of screening: filter whole-document 
+
+Things you are looking for:
+- Evidence of your **PICOS** list; i.e. inclusion and exclusion criteria
+- The I.V.(s) and D.V.(s) that you are interested in
+- Areas to update your search term list
+- Potential moderators of interest 
+  - What other common factors impact your RQ's? Write these down!
+- An *effect size*
+
+---
+class: middle
+### Defining Form of Effect Size
+
+This decision should be informed by:
+- your research question 
+- your field of research and audience (education, psychology, medicine?)
+- how you wish to interpret your findings
+
+You typically select from one of three families: 
+1. Mean difference
+2. Proportion
+3. Association
+
+```{r, out.height= "50%", out.width= "80%", echo = FALSE, fig.align='center'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/effect_sizes.jpeg?raw=true")
+```
+---
+class: middle
+### Types of Effect Sizes (ES)
+
+<u>Effects Based on Means (Standardized)</u>
+- Cohen's *d*: difference between groups in terms of standard deviations
+- Hedge's *g*: small sample correction (when *n* &#8804; 20) version of *d*
+- Glass's &Delta;: uses untainted SD of control group (use when SDs are sig. different)
+
+---
+class: middle
+### Types of Effect Sizes (ES)
+
+<u>Effects Based on Binary Proportion Data</u>
+- Odds Ratio *OR*: ratio of events (e.g. lung cancer in smoker) to non-events (e.g. lung cancer in non-smokers)
+- Risk Ratio *RR*: ratio of two proportions to show relative risk 
+- Risk Differences *RD*: attributable risk difference between two groups
+
+---
+class: middle
+### Types of Effect Sizes (ES)
+
+<u>Effects Based on Association</u>
+- Pearson product-moment correlation coefficient *r*: measure of association between two continuous variables
+- Point-biserial correlation <i>r<sub>pb</sub></i>: measure of association when one variable is dichotomous
+- Phi coefficient &Phi; : measure of association when both variables are dichotomous
+
+These are accompanied by a Fishers z-transformation to an approximately normal distribution so that values can be accurately compared across samples
+- Also provides sampling variance used to compute average weighted effect 
+- Are eventually transformed back into a correlation coefficient
+---
+class: inverse
+
+## 3. Screen the Literature
+### Effect Size Calculators and Converters
+
+When you run into: 
+- an F-statistic that you need translated into a Cohen's *d*
+- a &beta; that you must identify as an *r*
+- a Risk Ratio that you wish were a Hedge's *g*
+- a &#120536;<sup>2</sup> value that needs to be an *OR*
+
+Use these resources or create your own Excel/R calculators
+
+[Campbell's Collaboration](https://www.campbellcollaboration.org/research-resources/effect-size-calculator.html)
+
+[Psychometrica](https://www.psychometrica.de/effect_size.html)
+
+[escal](https://www.escal.site/#)
+---
+class: 
+## Standard Reporting
+Transparent reporting is inherent in meta-analyses, and requires you to track your literature search.
+- Allows others to audit your search, replicate, and confirm your findings
+  - Validity and honesty of your research practice (you have "*the receipts*"!)
+- Concurrent with your search, screening, and quality appraisal process
+
+<small> Recommended [PRISMA Guidelines](http://www.prisma-statement.org/PRISMAStatement/PRISMAEandE)</small>
+```{r, out.height= "50%", out.width= "70%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/PRISMA(2020).png?raw=true")
+```
+<small>[Shiny app](https://estech.shinyapps.io/prisma_flowdiagram/) to automate the creation of your flow diagram.</small>
+
+---
+class: middle
+## 4. Code the Studies
+#### Codebook and Moderators
+
+.pull-left[General information
+- article title, author, study number, effect size ID, publication type
+
+Participant information
+- sample size, % female, race/ethnicity indicators, average age, % diagnosed, etc.
+
+Measure information
+- name of instrument, scale, metric
+]
+.pull-left[
+```{r, echo = FALSE, fig.align='center'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/MagnifyingGlass.gif?raw=true")
+```
+]
+---
+class: middle
+## 4. Code the Studies
+#### Codebook and Moderators
+.pull-left[
+Effect size information
+- effect size statistic, variance, upper/lower CI, Fisher's z score
+]
+.pull-right[
+```{r, out.height= "50%", out.width= "70%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/garbageingarbageout11.png?raw=true")
+```
+]
+Study Quality information
+- measurement reliability (sample/manual), article quality tool, study power
+---
+class: middle
+## 5. Visualize the Data
+```{r Reading in Technostress Data, echo = FALSE}
+TechnostressData <- read.csv("/Users/jayjeffries/Desktop/Meta-Analysis/Technostress_Codebook.csv", header = TRUE, sep = ",")
+TechnostressData <- TechnostressData[1:139,]
+TechnostressData[TechnostressData == -999] <- NA
+
+TechnostressData$K12 <- ifelse(TechnostressData$school_type == "0", 1, 0)
+TechnostressData$higher <- ifelse(TechnostressData$school_type == "1", 1, 0)
+
+TechnostressData$school_type <- factor(TechnostressData$school_type)
+TechnostressData$latent_var <- factor(TechnostressData$latent_var)
+
+TechnostressData$anx <- ifelse(TechnostressData$latent_var == "0", 1, 0)
+TechnostressData$dep <- ifelse(TechnostressData$latent_var == "1", 1, 0)
+TechnostressData$fatigue <- ifelse(TechnostressData$latent_var == "2", 1, 0)
+
+#TechnostressData$latent_var[TechnostressData$latent_var == 2] <- NA
+```
+```{r EDA, echo = FALSE}
+TechStressPub = TechnostressData %>% # Creating a new dataset using the origina mtcars dataset       # Grouping the dataset by the carb variable
+  summarise( 
+    n = n(),
+    Published = sum(pub_status == "1"),
+    Year = mean(pub_year),
+    Effect_Sizes_per_Article = round(mean(ESID, na.rm = TRUE),2)
+  )
+
+TechStressDesc = TechnostressData %>% # Creating a new dataset using the origina mtcars dataset       # Grouping the dataset by the carb variable
+  summarise( 
+    n = n(), # n, or sample size count
+    N = round(mean(N, na.rm = TRUE),2), # changing the (,2) will round the average to whatever number of decimal points you would prefer
+    Age = round(mean(avg_age, na.rm = TRUE),2), # revising the name before the = (e.g. "Avg_drat") changes what appears in the table heading
+    Female = round(mean(pct_fem, na.rm = TRUE),2),
+    Black = round(mean(pct_black, na.rm = TRUE),2),
+    Hispanic = round(mean(pct_hispanic, na.rm = TRUE),2),
+    Asian = round(mean(pct_asian, na.rm = TRUE),2),
+    Native = round(mean(pct_native, na.rm = TRUE),2),
+    Multiple_RaceEthnicity = round(mean(pct_multi, na.rm = TRUE),2),
+    Unweighted_Effect_Size = round(mean(es_Ztocorr, na.rm = TRUE),2)
+  ) 
+
+PubDescriptives <- kbl(TechStressPub, caption = "Figure 2. Technostress Publications Descriptive Statistics") %>%
+  add_header_above(c(" " = 1, "Mean Statistic" = 3)) %>%
+  row_spec(0, bold = TRUE) %>%
+  kable_material("hover", font_size = 12, full_width = FALSE) %>%
+  kable_styling(html_font = "serif")
+
+SampleDescriptives <- kbl(TechStressDesc, caption = "Figure 1. Technostress Meta-Analysis Descriptive Statistics") %>%
+  add_header_above(c(" " = 1, "Mean Statistic" = 9)) %>%
+  row_spec(0, bold = TRUE) %>%
+  kable_material("hover", font_size = 12, full_width = FALSE) %>%
+  kable_styling(html_font = "serif")
+```
+```{r, fig.align = 'center', echo = FALSE, error = FALSE, message = FALSE}
+PubDescriptives
+SampleDescriptives
+```
+---
+class: middle
+## 5. Visualize the Data
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center"}
+ggplot(TechnostressData, aes(x = es_Ztocorr)) +
+  geom_histogram(aes(y=..density..), alpha=0.5, 
+  position="identity")+
+  geom_density(alpha=.2) 
+```
+---
+class: middle
+## 5. Visualize the Data
+
+.pull-left[
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center", out.height= "120%", out.width= "120%"}
+vars1 <- TechnostressData %>% select(es_Ztocorr, avg_age, K12, higher)
+corrvar1 <- cor(vars1, use = "pairwise.complete.obs")
+corrvar1[lower.tri(corrvar1, diag = TRUE)] <- NA
+corrplot(corrvar1, method = "number", type = "upper", diag = FALSE)
+```
+]
+.pull-right[
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center", out.height= "120%", out.width= "120%"}
+vars2 <- TechnostressData %>% select(es_Ztocorr, pct_fem, pct_black, pct_hispanic, pct_asian, pct_native, pct_multi, pct_white)
+corrvar2 <- cor(vars2, use = "pairwise.complete.obs")
+corrvar2[lower.tri(corrvar2, diag = TRUE)] <- NA
+corrplot(corrvar2, method = "number", type = "upper", diag = FALSE)
+```
+]
+---
+class: middle
+## 5. Visualize the Moderators
+.pull-left[
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center"}
+ggplot(TechnostressData, aes(x = es_Ztocorr, y = school_type, fill = school_type)) +
+  geom_density_ridges(
+   jittered_points = TRUE, quantile_lines = TRUE, scale = 0.9, alpha = 0.7,
+    vline_size = 1, vline_color = "red",
+    point_size = 0.4, point_alpha = 1,
+    position = position_raincloud(adjust_vlines = TRUE)) +
+  ggtitle("Effect Size Density by School Type") +
+  labs(x = "Effect Size", y = "School Type") 
+```
+]
+.pull-right[
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center"}
+ggplot(data = subset(TechnostressData, !is.na(latent_var)), 
+       aes(x = es_Ztocorr, y = latent_var, fill = latent_var)) +
+  geom_density_ridges(
+   jittered_points = TRUE, quantile_lines = TRUE, scale = 0.9, alpha = 0.7,
+    vline_size = 1, vline_color = "red",
+    point_size = 0.4, point_alpha = 1,
+    position = position_raincloud(adjust_vlines = TRUE)) +
+  ggtitle("Effect Size Density by Psychological Wellbeing Variable") +
+  labs(x = "Effect Size", y = "Latent Variable") 
+```
+]
+---
+class: middle
+## 5. Visualize the Moderators
+.pull-left[
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center"}
+ggplot(TechnostressData, aes(x = es_Ztocorr, y = avg_age, col = school_type, fill = school_type)) + 
+  geom_point(position = "jitter") +
+  labs(x = "Effect Size", y = "Average Age") + 
+  stat_smooth(method = "lm", formula = y ~ x, se = FALSE, color = "#1b9e77") +
+  ggtitle("Scatterplot of Average Age and Effect Size by School Type") +
+  stat_ellipse(geom="polygon", aes(fill = school_type), 
+                      alpha = 0.2,
+                      show.legend = TRUE, 
+                      level = 0.95)
+```
+]
+.pull-right[
+```{r, echo = FALSE, message = FALSE, warning = FALSE, error = FALSE, fig.align = "center"}
+ggplot(TechnostressData, aes(x = es_Ztocorr, y = avg_age, color = latent_var, fill = latent_var)) +
+  geom_point(position = "jitter") +
+  labs(x = "Effect Size", y = "Average Age") + 
+  geom_smooth(method = "lm", formula = y ~ x, 
+  se = FALSE, color = "#1b9e77") +
+  ggtitle("Scatterplot of Average Age and Effect Size by Stress Variable") +
+  stat_ellipse(geom="polygon", aes(fill = latent_var), 
+                      alpha = 0.2,
+                      show.legend = TRUE, 
+                      level = 0.95)
+```
+]
+---
+lass: middle
+## 5. Visualize Study Power
+#### Using {meta-viz}
+```{r, echo = FALSE}
+SE <- TechnostressData[ ,"fishers_SE"]
+effectsize <- TechnostressData[ ,"fishers_z"]
+
+TechStressDat <- abs(TechnostressData[1:139, c(48:50, 8, 55)])
+
+sunsetdata <- escalc(measure="ZCOR", ri = fishers_z, ni = N, sei = fishers_SE, vi = var, 
+              data = TechStressDat)
+
+res <- rma.uni(yi = TechnostressData$fishers_z, vi = TechnostressData$var, sei = 
+          TechnostressData$fishers_SE, method = "REML")
+
+power <-  pwr.r.test(r = TechnostressData$fishers_z, 
+                     n = TechStressDat$N,
+                     sig.level = 0.05, power = NULL,
+                     alternative = "two.sided")
+
+TechnostressData$power <- power$power
+```
+
+```{r, echo = FALSE, fig.align='center'}
+viz_sunset(res, contours = TRUE, true_effect = 0.173, power_contours =  "discrete")
+```
+
+
+---
+class: middle
+## 6. Statistically Describe Effect Sizes
+#### Robust Variance Estimation (RVE)
+
+Effect sizes advantage: comparable across all screened studies 
+  - <small>Requires a SE for each ES, as they are vital to the calculation of an average weighted effect size</small>
+
+Inverse variance weights for clustered effect sizes
+- <small>Allocates more weight to studies that are more precise</small>
+  - <small>Efficiency!</small>
+  - <small>Generally, which studies result in more precise prediction?</small>
+  
+`{robumeta}` function implements RVE in a meta-regression
+- <small>Outcomes are read the same as a typical regression</small>
+  - <small>Criterion (dependent) outcome is your effect size of choice</small>
+  - <small>Predictors (moderators) are provided beta weights</small>
+
+<small>Fisher & Tipton (2015) </small>
+---
+class: inverse, middle
+## 6. Statistically Describe Effect Sizes
+#### Model Types
+
+Effect size dependencies create an implied multilevel structure
+- <small>Treatment of heterogeneity (variance) depends on the type of model you choose to conduct a meta-analysis with</small>
+
+```{r, out.height= "60%", out.width= "80%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/MultilevelES.png?raw=true")
+```
+---
+class: 
+### Type of Model
+
+| Fixed Effect                                                    | Random Effect                                                            |
+|-----------------------------------------------------------------|--------------------------------------------------------------------------|
+| One true effect                                                 | True effect varies                                                       |
+| Effects from a single, homogeneous population                   | Effects from a distribution of effect sizes                              |
+| Differences between studies are due only to sampling error      | Differences between studies are due to many factors                      |
+| Larger studies are more influential                             | Studies weighted in a balanced way                                       |
+| Only account for within-study heterogeneity & error             | Accounts for within-study and between-study heterogeneity & error        |
+| Goal is to find the one true effect size that all studies share | Goal is to find the average effect from the distribution of effect sizes |
+| Often used for smaller sample of articles                       | Difficult to understand heterogeneity in small sample of articles        |
+
+<small>Borenstein et al. (2010)</small>
+---
+### Type of Model
+
+```{r, out.height= "60%", out.width= "80%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Screen%20Shot%202021-10-18%20at%203.21.05%20PM.png?raw=true")
+```
+---
+### Type of Model
+
+```{r, out.height= "60%", out.width= "80%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FEvsRE.jpg?raw=true")
+```
+---
+class: inverse
+### Fixed Effects Model
+
+.pull-left[
+```{r, out.height= "60%", out.width= "80%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FE_Model.png?raw=true")
+```
+]
+.pull-right[
+Strong assumption: effect sizes are homogeneous
+- Reserve for instances where studies are *close* replications of one another
+
+One source of variability: 
+- sampling error (*SE*<sub>i</sub>)
+- while *w*<sub>i</sub> indicates ES weight
+]
+.pull-left[
+```{r, out.height= "40%", out.width= "50%", fig.align ='center', echo = FALSE, fig.show='hold'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FE_ES.png?raw=true")
+```
+]
+.pull-right[
+```{r, out.height= "30%", out.width= "50%", fig.align ='center', echo = FALSE, fig.show='hold'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Fix_SE.png?raw=true")
+```
+]
+
+<small>Pigott, Polanin, Williams (2021) <i>AERA-ICPSR Workshop</i> </small>
+---
+class: inverse
+### Random Effects Model
+
+.pull-left[
+```{r, out.height= "60%", out.width= "80%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/REModel.png?raw=true")
+```
+]
+.pull-right[
+Harder to rule out a random effects model unless sterile conditions, carefully scripted, and precise replications
+
+Two sources of variability: 
+- sampling error (*SE*<sub>i</sub>) 
+-  between-study variance (&tau;<sup>2</sup>)
+- *w*<sub>i</sub> still indicates ES weight
+]
+.pull-left[
+```{r, out.height= "40%", out.width= "50%", fig.align ='center', echo = FALSE, fig.show='hold'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/FE_ES.png?raw=true")
+```
+]
+.pull-right[
+```{r, out.height= "40%", out.width= "50%", fig.align ='center', echo = FALSE, fig.show='hold'}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Rand_SE.png?raw=true")
+```
+]
+
+<small>Pigott, Polanin, Williams (2021) <i>AERA-ICPSR Workshop</i> </small>
+---
+class: inverse, middle
+## 6. Statistically Describe Effect Sizes
+#### {robumeta} Input
+
+```{r}
+base1 <- robu(formula = fishers_z ~ 1, data = TechnostressData, 
+            modelweights = "CORR", studynum = studyID, 
+            var.eff.size = var,
+            small = FALSE)
+```
+---
+class: inverse, middle
+## 6. Statistically Describe Effect Sizes
+#### {robumeta} Output
+
+```{r, echo = FALSE, highlight.output = c(8:9, 12)}
+base1 <- robu(formula = fishers_z ~ 1, data = TechnostressData, 
+            modelweights = "CORR", studynum = studyID, 
+            var.eff.size = var,
+            small = FALSE) %>%
+print()
+```
+---
+class: middle
+## 6. Statistically Describe Effect Sizes
+
+<big>*T*<sup>2</sup> = .027</big>
+- Quantifies the variance of the true effect size
+  - SD of true effect = .16
+- Insensitive to sample size
+
+.pull-left[
+```{r, out.height= "90%", out.width= "70%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/CochranesQ.png?raw=true")
+```
+]
+.pull-right[
+```{r, out.height= "50%", out.width= "70%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/Tau-square.png?raw=true")
+```
+]
+---
+class: middle
+## 6. Statistically Describe Effect Sizes
+.pull-left[
+<big>*I*<sup>2</sup> = 99.43%</big>
+- Percentage of variability *not* caused by sampling error
+  - i.e. the % between-study heterogeneity
+- Impacted by sample size
+]
+.pull-right[
+```{r, fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/distributions.png?raw=true")
+```
+]
+
+<small>Borenstein et al. (2007)</small>
+---
+class: inverse
+## 7. Data and Bias Diagnostics
+#### Publication Bias
+- Phenomenon where published research is dependent on the direction or strength of results
+  - <small>Non-significance typically underpublished = inflation of ES</small>
+- Consequences: Distorts literature, wastes resources, misguides research, harm
+```{r, out.height = "20%", fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/PubBias.png?raw=true")
+```
+  
+---
+class: middle
+## 7. Data and Bias Diagnostics
+#### {metafor} Funnel Plots using
+
+.pull-left[
+```{r, echo = FALSE}
+funnel(effectsize, sei = SE, refline = .173, main = "Funnel Plot", legend = TRUE, xlab = "Fishers z Transformed Correlation Coefficient") 
+```
+]
+.pull-right[
+Funnel Plot Asymmetry
+- Plot fixed on the average weighted ES = .173
+- Comes from heterogeneity, publication bias, chance
+
+Where are we missing studies?
+
+<small>Note: SE's increase from top to bottom</small>
+]
+---
+class: middle
+## 6. Data and Bias Diagnostics
+#### {metafor} Funnel Plots
+
+.pull-left[
+```{r, echo = FALSE}
+funnel(effectsize, sei = SE, refline = .173, level = c(90, 95, 99), 
+    shade = c("white", "orange", "red"), main = "Countour-Enhanced Funnel Plot", legend = TRUE)
+```
+]
+.pull-right[
+Egger's Regression Test
+- Statistical est for asymmetry
+- Regresses effect size on its standard error (weighted by inverse variance)
+- Significance indicates asymmetry
+
+<small>Note: SE's increase from top to bottom</small>
+]
+---
+class: middle
+## 7. Data and Bias Diagnostics
+#### {robumeta} Egger's Test 
+
+```{r}
+robu(formula = fishers_z ~ SE, data = TechnostressData,
+                   modelweights = "CORR", studynum = studyID, 
+                   var.eff.size = var, small = TRUE) %>% print()
+```
+---
+class: middle
+## 7. Data and Bias Diagnostics
+####{robumeta} Trim and Fill Test Summary
+
+```{r, echo = FALSE, highlight.output = 2}
+onelevel <- rma(fishers_z, var, data = TechnostressData)
+trimandfill <- trimfill(onelevel)
+summary(trimandfill)
+```
+---
+class: middle
+## 6. Data and Bias Diagnostics
+#### {metafor} Trim and Fill Simulated Funnel Plot
+
+```{r, echo = FALSE, out.height= "60%", out.width= "50%", fig.align ='center'}
+trimandfill %>%
+funnel()
+```
+---
+class: middle
+## 7. Data and Bias Diagnostics
+#### PET-PEESE Publication Bias Correction
+.pull-left[
+*PET* - Precision-Effect Testing
+- provides ES that corrects for publication bias
+  - the ES of a hypothetically "perfect" meta-analysis
+- looks for positive correlation between standard error and ES
+- biased as it assumes a homogeneous underlying true effect
+
+*PEESE* - Precision-Effect Estimate with Standard Error
+- typically a follow-up test when PET is significant
+]
+
+Both have *large* limitations but are seen in current literature.
+.pull-right[
+```{r, fig.align ='center', echo = FALSE}
+knitr::include_graphics("https://github.com/jjeffries13/MA-Primer-Presentation/blob/main/Images/PET.png?raw=true")
+```
+]
+---
+class: middle
+## 7. Data and Bias Diagnostics
+#### {robumeta} PET Correction
+
+```{r, echo = FALSE, highlight.output = 12:13}
+PET <- robu(formula = fishers_z ~ fishers_SE, data = TechnostressData, 
+              modelweights = "CORR", studynum = studyID, var.eff.size = var, small = TRUE)
+print(PET)
+```
+---
+class: middle
+## 7. Data and Bias Diagnostics
+#### p-Uniform* Publication Bias Correction
+
+p-uniform* Corrector (RE)
+- Assumes that *p*-values uniformly distributed at the true ES (as is true in normal NHST)
+- ES estimate of *p*-uniform* represents the ES for which the *p*-values are uniformly distributed 
+
+<small> van Aert et al. (2016) </small>
+---
+class: middle
+## 7. Data and Bias Diagnostics
+#### {puniform} Output
+
+```{r, echo = FALSE}
+puniform <- puni_star(ri = TechnostressData$es_anxcorr, ni = TechnostressData$N, yi = TechnostressData$fishers_z, vi = TechnostressData$var, alpha = .05, method = "ML", side = "right")
+
+print(puniform)
+```
+---
+class: inverse
+## 8. Interpreting Outcomes
+#### Meta-Regression with Moderators
+
+```{r, echo = FALSE, warning = FALSE, errors = FALSE, message = FALSE, highlight.output = c(12, 15)}
+metareg <- robu(fishers_z ~  avg_age + higher + dep,
+data = TechnostressData, modelweights = "CORR", studynum = studyID, var.eff.size = var, small = TRUE, na.rm = TRUE)
+metareg
+```
+---
+class: inverse
+## 8. Interpreting Outcomes
+#### Plug and Chug 1
+
+If you are interested in the average age of students in your sample (average age = 17.1), who are participanting in K-12, and you measured anxiety, your Fishers z would be equal to:
+
+```{r}
+z <- (.4689 + (-.0163 * (17.1) ) + (.0943 * (0) ) + (-.1308 * (0) ))
+z
+```
+FISHERINV(.19017); z to *r* transformation, *r* = .1879
+---
+class: inverse
+## 8. Interpreting Outcomes
+#### Plug and Chug 2
+
+If your sample involves 19 year olds, higher education, and you measured depression, your Fishers z would be equal to:
+
+```{r}
+z1 <- (.4689 + (-.0163 * (19) ) + (.0943 * (1) ) + (-.1308 * (1) ))
+z1
+```
+FISHERINV(.1227); z to *r* transformation, *r* = .1220
+---
+## 9. Presenting Results
+#### Forest Plot
+
+- x-axis = ES of interest, centered at 0
+- y-axis = study name/author name/effect size ID
+- bars around points = 95% confidence interval
+- largers points = larger N
+
+```{r, eval = FALSE}
+forester(left_side_data = TechnostressData[,c(1, 3, 5, 6, 64)],
+         estimate = TechnostressData$es_Ztocorr,
+         ci_low = TechnostressData$es_Ztocorr_CI_lower,
+         ci_high = TechnostressData$es_Ztocorr_CI_upper,
+         display = FALSE,
+         xlim = c(-1, 1),
+         null_line_at = c(0,.165),
+         file_path = "/Users/jayjeffries/Desktop/Meta-Analysis/Data File/forester_plot.png",
+         font_family = "sans")
+```
+---
+## Resources
+[Doing Meta-Analysis in R](https://bookdown.org/MathiasHarrer/Doing_Meta_Analysis_in_R/) Online Text 
+- <small>Advanced sections: MLM M-A, SEM M-A, Network M-A, Bayesian M-A</small>
+
+[{robumute} Vignette](https://cran.r-project.org/web/packages/robumeta/vignettes/robumetaVignette.pdf) - <small>RVE Meta-Regression, Egger's Test</small>
+
+[{metafor} Vignette](https://cran.r-project.org/web/packages/metafor/vignettes/metafor.pdf) - <small> Funnel Plots, Trim and Fill</small>
+
+[{metaviz} Vignette](https://cran.r-project.org/web/packages/metaviz/vignettes/metaviz.html) - <small>Power Sunset Plot</small>
+
+[{puniform} Vignette](https://cran.r-project.org/web/packages/puniform/puniform.pdf) - Publication Correction
+
+[{forester} GitHub Page](https://github.com/rdboyes/forester/) - <small>Publication-Ready Forest Plot</small>
+
+[Interactive Meta-Analysis Site](https://www.air.org/centers/mosaic/mosaic-db)
+- <small>Explore heterogeneity of math intervention outcome effect sizes sponsored by *IES*</small>
+
+---
+class: inverse
+## References
+
+<small>
+Borenstein, M., Hedges, L., & Rothstein, H. (n.d.). Meta-Analysis Fixed effect vs. Random effects. 162.
+
+Borenstein, M., Hedges, L. V., Higgins, J. P. T., & Rothstein, H. R. (2010). A basic introduction to fixed-effect and random-effects models for meta-analysis. Research Synthesis Methods, 1(2), 97–111. https://doi.org/10.1002/jrsm.12
+
+Fisher, Z., & Tipton, E. (2015). robumeta: An R-package for robust variance estimation in meta-analysis. ArXiv:1503.02220 [Stat]. http://arxiv.org/abs/1503.02220
+
+Graham, S., Hebert, M., Fishman, E., Ray, A. B., & Rouse, A. G. (2020). Do Children Classified With Specific Language Impairment Have a Learning Disability in Writing? A Meta-Analysis. Journal of Learning Disabilities, 53(4), 292–310. https://doi.org/10.1177/0022219420917338
+
+Cooper, H., Hedges, L. V., & Valentine, J. C. (Eds.). (2019). The handbook of research synthesis and meta-analysis (3rd ed.). Russell Sage Foundation.</small>
+---
+class:inverse
+## References
+
+<small>Higgins, J. P. T. (2008). Commentary: Heterogeneity in meta-analysis should be expected and appropriately quantified. International Journal of Epidemiology, 37(5), 1158–1160. https://doi.org/10.1093/ije/dyn204
+
+Polanin, J. R., Espelage, D. L., & Pigott, T. D. (2012). A Meta-Analysis of School-Based Bullying Prevention Programs’ Effects on Bystander Intervention Behavior. School Psychology Review, 41(1), 47–65. https://doi.org/10.1080/02796015.2012.12087375
+
+Spineli, L. M., & Pandis, N. (2020). Fixed-effect versus random-effects model in meta-regression analysis. American Journal of Orthodontics and Dentofacial Orthopedics, 158(5), 770–772. https://doi.org/10.1016/j.ajodo.2020.07.016
+
+van Aert, R. C. M., Wicherts, J. M., & van Assen, M. A. L. M. (2016). Conducting Meta-Analyses Based on p Values: Reservations and Recommendations for Applying p -Uniform and p -Curve. Perspectives on Psychological Science, 11(5), 713–729. https://doi.org/10.1177/1745691616650874</small>
+
+---
+# Thoughts and Questions
